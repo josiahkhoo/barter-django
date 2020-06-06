@@ -1,0 +1,182 @@
+import uuid
+import json
+# from .services.email_verification.service import EmailVerificationService
+from .backends import JWTAuthentication
+from .renderers import UserJSONRenderer
+from .models import User
+from .serializers import *
+from .forms import *
+from .utils import UserStatus
+from barter.utils import *
+from rest_framework import status, authentication, permissions
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.utils import timezone
+from django.contrib.auth.models import AnonymousUser
+from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import render
+
+
+# Create your views here.
+
+
+class UserLoginView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        data = post_request_parser(request)
+        email = data['email']
+        password = data['password']
+        user = authenticate(request, email=email, password=password)
+        if user is not None:
+            login(request, user)
+            body = {'token': user.token}
+            body.update(serializer_to_body(
+                UserSerializer, user, "user"))
+            # Redirect to a success page.
+            return Response(body, status=status.HTTP_200_OK)
+        else:
+            # Return an 'invalid login' error message.
+            return Response(
+                "Invalid login, please check your email and password",
+                status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserLogoutView(APIView):
+    '''
+    This is necessary in order to accept JSON Web Tokens
+    POST Requests needs to have this in header:
+    Key = Authorization
+    Value = Token "Insert Token here"
+
+    In order to access user from the request, do 'request.user'
+    '''
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user = request.user
+            user.datetime_last_logout = timezone.now()
+            user.save()
+            return Response(status=status.HTTP_200_OK)
+        except:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserCreateView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.AllowAny]
+    Serializer = UserSerializer
+
+    def post(self, request):
+        data = post_request_parser(request)
+        form = CustomUserCreationForm(data)
+        if form.is_valid():
+            user = form.save()
+            body = serializer_to_body(self.Serializer, user, "user")
+            # EmailVerificationService().send_email_verification(user)
+            return Response(body, status=status.HTTP_200_OK)
+        else:
+            print(form.errors)
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.AllowAny]
+    serializer_classes = [UserSerializer,
+                          PublicUserSerializer, UserUpdateSerializer]
+
+    def get(self, request, pk=None):
+        try:
+            if pk is None and not isinstance(request.user, AnonymousUser):
+                user = request.user
+                body = serializer_to_body(
+                    UserSerializer, user, "user")
+                return Response(body, status=status.HTTP_200_OK)
+
+            elif pk:
+                user = User.objects.get(pk=pk)
+                body = serializer_to_body(
+                    PublicUserSerializer, user, "user")
+                return Response(body, status=status.HTTP_200_OK)
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST)
+        except User.DoesNotExist:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request):
+        user = request.user
+        serializer = UserUpdateSerializer(
+            user, data=request.data, partial=True)
+        if serializer.is_valid():
+            user = serializer.save()
+            body = serializer_to_body(UserSerializer, user, "user")
+            return Response(body, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserPasswordChangeView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        data = post_request_parser(request)
+        # checks if password is set or is valid
+        if user.has_usable_password():
+            form = CustomPasswordChangeForm(user=user, data=data)
+        else:
+            form = CustomPasswordSetForm(user=user, data=data)
+        if form.is_valid():
+            user = form.save()
+            body = serializer_to_body(UserSerializer, user, "user")
+            return Response(body, status=status.HTTP_200_OK)
+        else:
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+# class UserVerifyEmailView(APIView):
+
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [permissions.AllowAny]
+
+#     def get(self, request, uuid):
+#         user, success = EmailVerificationService().verify_user(uuid)
+#         if success:
+#             body = serializer_to_body(UserSerializer, user, "user")
+#             return Response(body, status=status.HTTP_200_OK)
+#         else:
+#             return Response("Invalid verification token",
+#                             status=status.HTTP_400_BAD_REQUEST)
+
+
+# class UserSendVerificationEmailView(APIView):
+#     """
+#     Generates a new uuid for the user and sends email to verify
+#     """
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes = [permissions.AllowAny]
+
+#     def get(self, request):
+#         user = request.user
+#         if user.status == UserStatus.UNVERIFIED:
+#             # refresh uuid on user
+#             user.uuid = uuid.uuid4()
+#             user.save()
+#             EmailVerificationService().send_email_verification(user)
+#             body = serializer_to_body(UserSerializer, user, "user")
+#             return Response(body, status=status.HTTP_200_OK)
+#         else:
+#             return Response(
+#                 "Invalid verification token",
+#                 status=status.HTTP_400_BAD_REQUEST)
