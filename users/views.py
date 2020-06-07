@@ -28,9 +28,9 @@ class UserLoginView(APIView):
 
     def post(self, request):
         data = post_request_parser(request)
-        email = data['email']
+        username = data['username']
         password = data['password']
-        user = authenticate(request, email=email, password=password)
+        user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
             body = {'token': user.token}
