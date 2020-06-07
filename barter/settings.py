@@ -29,7 +29,9 @@ SECRET_KEY = 'x(!0-g4dymec5+b@eo3xc_2h3)sb)$9g+(6257jz^ro#&0)2v&'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '*',
+]
 
 
 # Application definition
@@ -41,6 +43,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
+    'django_countries',
+    'django_redis',
+    'django_extensions',
+    'rest_framework',
     'users'
 ]
 
@@ -58,6 +65,7 @@ ROOT_URLCONF = 'urls'
 
 AUTHENTICATION_BACKENDS = [
     'users.backends.JWTAuthentication',
+    'django.contrib.auth.backends.ModelBackend',
 ]
 
 REST_FRAMEWORK = {

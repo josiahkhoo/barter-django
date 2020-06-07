@@ -2,9 +2,6 @@ from rest_framework import serializers
 from .models import User
 from django.contrib.auth import authenticate
 from django_countries.serializer_fields import CountryField
-from products.serializers import BaseProductSerializer
-from product_folders.serializers import ProductFoldersSerializer
-from product_folders.models import ProductFolders
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -13,9 +10,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'email', 'first_name', 'last_name', 'profile_picture',
+        fields = ('id', 'email',
                   'username', 'date_of_birth', 'country', 'bio',
-                  'status', 'folders',
+                  'status',
                   'datetime_created', 'datetime_last_logout')
 
     def validate_email(self, value):
@@ -23,14 +20,6 @@ class UserSerializer(serializers.ModelSerializer):
         if User.objects.filter(email=norm_email).exists():
             raise serializers.ValidationError("Not unique email")
         return norm_email
-
-    def validate_first_name(self, value):
-        norm_first_name = value.lower()
-        return norm_first_name
-
-    def validate_last_name(self, value):
-        norm_last_name = value.lower()
-        return norm_last_name
 
     def to_representation(self, obj):
         data = super(UserSerializer, self).to_representation(obj)
@@ -103,7 +92,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('email', 'first_name', 'last_name', 'bio')
+        fields = ('email', 'bio')
 
     def validate_email(self, value):
         norm_email = value.lower()
@@ -111,43 +100,13 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Not unique email")
         return norm_email
 
-    def validate_first_name(self, value):
-        norm_first_name = value.lower()
-        return norm_first_name
-
-    def validate_last_name(self, value):
-        norm_last_name = value.lower()
-        return norm_last_name
-
 
 class PublicUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
         fields = (
-            'first_name',
-            'last_name',
             'profile_picture',
             'username',
             'bio'
         )
-
-    def validate_first_name(self, value):
-        norm_first_name = value.lower()
-        return norm_first_name
-
-    def validate_last_name(self, value):
-        norm_last_name = value.lower()
-        return norm_last_name
-
-
-# class UserSavedProductsSerializer(serializers.ModelSerializer):
-
-#     saved_products = BaseProductSerializer(many=True)
-
-#     class Meta:
-#         model = User
-#         fields = (
-#             'id',
-#             'saved_products'
-#         )
