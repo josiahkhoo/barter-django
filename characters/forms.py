@@ -9,5 +9,5 @@ class CharacterForm(forms.ModelForm):
         fields = (
             'name',
             'appearance_config',
-            'is_active',
+            'user',
         )
