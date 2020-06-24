@@ -6,9 +6,9 @@ class CharacterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Character
-        fields = {
+        fields = [
             'id',
             'name',
             'apperance_config',
             'user'
-        }
+        ]
