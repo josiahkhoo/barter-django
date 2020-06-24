@@ -9,6 +9,6 @@ class CharacterSerializer(serializers.ModelSerializer):
         fields = [
             'id',
             'name',
-            'apperance_config',
+            'appearance_config',
             'user'
         ]
