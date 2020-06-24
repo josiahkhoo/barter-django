@@ -28,6 +28,7 @@ class UserLoginView(APIView):
 
     def post(self, request):
         data = post_request_parser(request)
+        print(data)
         username = data['username']
         password = data['password']
         user = authenticate(request, username=username, password=password)
@@ -41,7 +42,7 @@ class UserLoginView(APIView):
         else:
             # Return an 'invalid login' error message.
             return Response(
-                "Invalid login, please check your email and password",
+                "Invalid login, please check your username and password",
                 status=status.HTTP_400_BAD_REQUEST)
 
 

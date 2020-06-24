@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'django_redis',
     'django_extensions',
     'rest_framework',
-    'users'
+    'users',
+    'characters',
 ]
 
 MIDDLEWARE = [

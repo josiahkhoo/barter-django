@@ -2,17 +2,20 @@ from rest_framework import serializers
 from .models import User
 from django.contrib.auth import authenticate
 from django_countries.serializer_fields import CountryField
+from characters.serializers import CharacterSerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
 
     country = CountryField
+    characters = CharacterSerializer(many=True)
 
     class Meta:
         model = User
         fields = ('id', 'email',
                   'username', 'date_of_birth', 'country', 'bio',
                   'status',
+                  'characters',
                   'datetime_created', 'datetime_last_logout')
 
     def validate_email(self, value):
@@ -103,10 +106,13 @@ class UserUpdateSerializer(serializers.ModelSerializer):
 
 class PublicUserSerializer(serializers.ModelSerializer):
 
+    characters = CharacterSerializer(many=True)
+
     class Meta:
         model = User
         fields = (
             'profile_picture',
             'username',
-            'bio'
+            'bio',
+            'characters'
         )
