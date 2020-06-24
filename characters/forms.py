@@ -6,4 +6,8 @@ class CharacterForm(forms.ModelForm):
 
     class Meta:
         model = Character
-        fields = '__all__'
+        fields = (
+            'name',
+            'appearance_config',
+            'is_active',
+        )
