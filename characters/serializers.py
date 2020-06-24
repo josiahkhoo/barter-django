@@ -6,4 +6,9 @@ class CharacterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Character
-        fields = '__all__'
+        fields = {
+            'id',
+            'name',
+            'apperance_config',
+            'user'
+        }
