@@ -111,8 +111,11 @@ class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = (
+            'id',
+            'email',
             'profile_picture',
             'username',
             'bio',
-            'characters'
+            'characters',
+            'status',
         )
