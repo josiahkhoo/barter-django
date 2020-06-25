@@ -113,7 +113,6 @@ class PublicUserSerializer(serializers.ModelSerializer):
         fields = (
             'id',
             'email',
-            'profile_picture',
             'username',
             'bio',
             'characters',
