@@ -10,5 +10,7 @@ class MonsterSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'duration',
-            'appearance_config'
+            'appearance_config',
+            'level',
+            'is_active'
         ]
