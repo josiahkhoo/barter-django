@@ -9,8 +9,10 @@ from battles.utils import *
 
 class Battle(models.Model):
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    monster = models.ForeignKey(Monster, on_delete=models.CASCADE)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='battles')
+    monster = models.ForeignKey(
+        Monster, on_delete=models.CASCADE, related_name='battles')
     datetime_created = models.DateTimeField(default=timezone.now)
     datetime_updated = models.DateTimeField(auto_now=True)
     state = models.IntegerField(

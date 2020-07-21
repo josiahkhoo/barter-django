@@ -37,6 +37,7 @@ class BattleView(APIView):
     def post(self, request):
         user = request.user
         data = post_request_parser(request)
+        data["user"] = user
         form = BattleForm(data)
         if form.is_valid():
             battle = form.save()
@@ -55,6 +56,8 @@ class BattleCompleteView(APIView):
     def post(self, request, pk):
         user = request.user
         battle = get_object_or_404(Battle, pk=pk)
+        if battle.user != user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         battle.set_state_complete()
         data = serializer_to_body(
             BattleSerializer, battle, "battle", context={"user": user}
@@ -69,6 +72,8 @@ class BattleForfeitView(APIView):
     def post(self, request, pk):
         user = request.user
         battle = get_object_or_404(Battle, pk=pk)
+        if battle.user != user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
         battle.set_state_forfeited()
         data = serializer_to_body(
             BattleSerializer, battle, "battle", context={"user": user}
