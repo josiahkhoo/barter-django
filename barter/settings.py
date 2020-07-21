@@ -51,6 +51,9 @@ INSTALLED_APPS = [
     'users',
     'characters',
     'monsters',
+    'chats',
+    'parties',
+    'battles',
 ]
 
 MIDDLEWARE = [
