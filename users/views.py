@@ -10,7 +10,7 @@ from .utils import UserStatus
 from barter.utils import *
 from rest_framework import status, authentication, permissions
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.response import Response
 from django.utils import timezone
 from django.contrib.auth.models import AnonymousUser
@@ -144,3 +144,38 @@ class UserPasswordChangeView(APIView):
             return Response(body, status=status.HTTP_200_OK)
         else:
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserFriendsRequestView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        users = user.get_incoming_friend_requests()
+        body = serializer_to_many_body(UserSerializer, users, "users")
+        return Response(body, status=status.HTTP_200_OK)
+
+
+class UserFriendsView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        users = user.get_friends()
+        body = serializer_to_many_body(UserSerializer, users, "users")
+        return Response(body, status=status.HTTP_200_OK)
+
+    def post(self, request, pk):
+        """
+        Initiate friend request or accept friend request using this view
+        """
+        user = request.user
+        other_user = request.user
+        user.add_friend(other_user)
+        users = user.get_friends()
+        body = serializer_to_many_body(UserSerializer, users, "users")
+        return Response(body, status=status.HTTP_200_OK)

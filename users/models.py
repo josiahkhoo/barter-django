@@ -32,6 +32,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     datetime_last_logout = models.DateTimeField(
         _('datetime last logout'), default=timezone.now)
     uuid = models.UUIDField(default=uuid.uuid4, db_index=True)
+    outgoing_friends = models.ManyToManyField(
+        'User', blank=True, related_name='incoming_friends')
 
     objects = CustomUserManager()
 
@@ -63,3 +65,32 @@ class User(AbstractBaseUser, PermissionsMixin):
         }, settings.SECRET_KEY, algorithm='HS256')
 
         return token.decode('utf-8')
+
+    def get_incoming_friend_requests(self):
+        incoming_friends = self.incoming_friends.all()
+        outgoing_friends = self.outgoing_friends.all()
+        friend_requests = list(filter(
+            lambda x: x not in outgoing_friends, incoming_friends
+        ))
+        return friend_requests
+
+    def get_outgoing_friend_requests(self):
+        incoming_friends = self.incoming_friends.all()
+        outgoing_friends = self.outgoing_friends.all()
+        friend_requests = list(filter(
+            lambda x: x not in incoming_friends, outgoing_friends
+        ))
+        return friend_requests
+
+    def get_friends(self):
+        incoming_friends = self.incoming_friends.all()
+        outgoing_friends = self.outgoing_friends.all()
+        friend_requests = list(filter(
+            lambda x: x in outgoing_friends, incoming_friends
+        ))
+        return friend_requests
+
+    def add_friends(self, other_user):
+        self.outgoing_friends.add(other_user)
+        self.save()
+        return self
