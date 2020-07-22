@@ -90,7 +90,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ))
         return friend_requests
 
-    def add_friends(self, other_user):
+    def add_friend(self, other_user):
         self.outgoing_friends.add(other_user)
         self.save()
         return self
