@@ -169,12 +169,13 @@ class UserFriendsView(APIView):
         body = serializer_to_many_body(UserSerializer, users, "users")
         return Response(body, status=status.HTTP_200_OK)
 
-    def post(self, request, pk):
+    def post(self, request, username):
         """
         Initiate friend request or accept friend request using this view
         """
         user = request.user
-        other_user = get_object_or_404(User, pk=pk)
+        print(username)
+        other_user = get_object_or_404(User, username=username)
         user.add_friend(other_user)
         users = user.get_friends()
         body = serializer_to_many_body(UserSerializer, users, "users")

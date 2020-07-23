@@ -91,6 +91,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         return friend_requests
 
     def add_friend(self, other_user):
+        if other_user == self:
+            raise Exception("Friend is yourself")
         self.outgoing_friends.add(other_user)
         self.save()
         return self

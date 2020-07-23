@@ -13,7 +13,7 @@ urlpatterns = [
     url(r'^api/users/logout/$', views.UserLogoutView.as_view()),
     url(r'^api/users/password/change/$',
         views.UserPasswordChangeView.as_view()),
-    url(r'^api/users/friends/(?P<pk>[0-9]+)$',
+    url(r'^api/users/friends/(?P<username>[a-zA-Z0-9]+)$',
         views.UserFriendsView.as_view()),
     url(r'^api/users/friends/$',
         views.UserFriendsView.as_view()),
