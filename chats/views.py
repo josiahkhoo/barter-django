@@ -93,13 +93,15 @@ class UserMessageView(APIView):
 
     def post(self, request, pk):
         """
-        This pk refers to user pk
+        This pk refers to conversation pk
         """
-        recipient_user = get_object_or_404(User, pk=pk)
+        if not isinstance(request.user, User):
+            return Response("Auth required",
+                            status=status.HTTP_401_UNAUTHORIZED)
         user = request.user
         data = post_request_parser(request)
+        data["chat"] = get_object_or_404(Conversation, pk=pk).chat
         data["message_type"] = int(MessageType.MESSAGE_USER)
-        data["recipient_user"] = recipient_user
         data["user"] = user
         context = dict()
         context["user"] = user
@@ -115,11 +117,40 @@ class UserMessageView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
+class UserConversationView(APIView):
+
+    permission_clases = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        """
+        This pk refers to other user pk
+        """
+        if not isinstance(request.user, User):
+            return Response("Auth required",
+                            status=status.HTTP_401_UNAUTHORIZED)
+        recipient_user = get_object_or_404(User, pk=pk)
+        user = request.user
+        conversation = Conversation.objects.filter(
+            users__in=[user, recipient_user]).first()
+        if not conversation:
+            conversation = Conversation()
+            conversation.save()
+            conversation.users.add(user)
+            conversation.users.add(recipient_user)
+        data = serializer_to_body(
+            ConversationSerializer, conversation,
+            "conversation")
+        return Response(data, status=status.HTTP_200_OK)
+
+
 class ChatSeenView(APIView):
 
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, pk):
+        if not isinstance(request.user, User):
+            return Response("Auth required",
+                            status=status.HTTP_401_UNAUTHORIZED)
         user = request.user
         chat = get_object_or_404(Chat, pk=pk)
         receipt, created = Receipt.objects.get_or_create(

@@ -81,3 +81,10 @@ class ChatSerializer(serializers.ModelSerializer):
             else:
                 return other_messages.count()
         return None
+
+
+class ConversationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Conversation
+        fields = "__all__"

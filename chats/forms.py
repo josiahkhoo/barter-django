@@ -11,5 +11,4 @@ class MessageForm(forms.ModelForm):
             'content',
             'chat',
             'message_type',
-            'recipient_user'
         ]

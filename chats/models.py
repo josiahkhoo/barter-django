@@ -25,10 +25,6 @@ class Message(models.Model):
     chat = models.ForeignKey(
         Chat, on_delete=models.CASCADE, related_name='messages', null=True, blank=True)
     message_type = models.IntegerField(choices=MessageType.choices())
-    recipient_user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='incoming_messages',
-        null=True, blank=True
-    )
 
     @staticmethod
     def create_message_system(chat, content):
@@ -56,8 +52,6 @@ class Message(models.Model):
             data["chat_id"] = self.chat.id
         if self.user:
             data["user_id"] = self.user.id
-        if self.recipient_user:
-            data["recipient_user_id"] = self.recipient_user.id
         return data
 
     def send_to_firebase(self):
@@ -77,3 +71,21 @@ class Receipt(models.Model):
         Chat, on_delete=models.CASCADE, related_name='receipts'
     )
     datetime_updated = models.DateTimeField(auto_now=True)
+
+
+class Conversation(models.Model):
+
+    users = models.ManyToManyField(
+        User, related_name="conversations"
+    )
+    chat = models.OneToOneField(
+        Chat, null=True, blank=True, on_delete=models.CASCADE,
+        related_name='conversations')
+
+    def save(self, *args, **kwargs):
+        # generate a chat object
+        if not (self.chat):
+            chat = Chat()
+            chat.save()
+            self.chat = chat
+        super().save(*args, **kwargs)
