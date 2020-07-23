@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework import status, authentication, permissions
 
@@ -80,6 +80,34 @@ class ChatMessageView(APIView):
             message = form.save()
             data = serializer_to_body(
                 ChatSerializer, chat, "chat", context=context
+            )
+            return Response(data, status.HTTP_200_OK)
+        else:
+            return Response(form.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserMessageView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, pk):
+        """
+        This pk refers to user pk
+        """
+        recipient_user = get_object_or_404(User, pk=pk)
+        user = request.user
+        data = post_request_parser(request)
+        data["message_type"] = int(MessageType.MESSAGE_USER)
+        data["recipient_user"] = recipient_user
+        data["user"] = user
+        context = dict()
+        context["user"] = user
+        form = MessageForm(data)
+        if form.is_valid():
+            message = form.save()
+            data = serializer_to_body(
+                MessageSerializer, message, "message", context=context
             )
             return Response(data, status.HTTP_200_OK)
         else:

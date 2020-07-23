@@ -23,8 +23,12 @@ class Message(models.Model):
     datetime_created = models.DateTimeField(default=timezone.now)
     content = models.TextField()
     chat = models.ForeignKey(
-        Chat, on_delete=models.CASCADE, related_name='messages')
+        Chat, on_delete=models.CASCADE, related_name='messages', null=True, blank=True)
     message_type = models.IntegerField(choices=MessageType.choices())
+    recipient_user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='incoming_messages',
+        null=True, blank=True
+    )
 
     @staticmethod
     def create_message_system(chat, content):
@@ -46,11 +50,14 @@ class Message(models.Model):
         data = {
             "content": self.content,
             "datetime_created": self.datetime_created,
-            "chat_id": self.chat.id,
             "message_type": self.message_type,
         }
+        if self.chat_id:
+            data["chat_id"] = self.chat.id
         if self.user:
             data["user_id"] = self.user.id
+        if self.recipient_user:
+            data["recipient_user_id"] = self.recipient_user.id
         return data
 
     def send_to_firebase(self):
