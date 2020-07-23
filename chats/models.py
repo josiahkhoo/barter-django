@@ -11,8 +11,11 @@ class Chat(models.Model):
     datetime_created = models.DateTimeField(default=timezone.now)
 
     def get_user_list(self):
-        if self.party:
+        try:
             return self.party.users.all()
+        except Exception as e:
+            pass
+        return self.conversation.users.all()
 
 
 class Message(models.Model):
@@ -23,7 +26,7 @@ class Message(models.Model):
     datetime_created = models.DateTimeField(default=timezone.now)
     content = models.TextField()
     chat = models.ForeignKey(
-        Chat, on_delete=models.CASCADE, related_name='messages', null=True, blank=True)
+        Chat, on_delete=models.CASCADE, related_name='messages')
     message_type = models.IntegerField(choices=MessageType.choices())
 
     @staticmethod
@@ -80,7 +83,7 @@ class Conversation(models.Model):
     )
     chat = models.OneToOneField(
         Chat, null=True, blank=True, on_delete=models.CASCADE,
-        related_name='conversations')
+        related_name='conversation')
 
     def save(self, *args, **kwargs):
         # generate a chat object

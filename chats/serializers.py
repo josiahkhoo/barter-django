@@ -5,9 +5,6 @@ from users.serializers import *
 
 class MessageSerializer(serializers.ModelSerializer):
 
-    user = UserSerializer()
-    is_current_user = serializers.SerializerMethodField()
-
     class Meta:
         model = Message
         fields = "__all__"
@@ -30,8 +27,7 @@ class ReceiptSerializer(serializers.ModelSerializer):
 class ChatSerializer(serializers.ModelSerializer):
 
     # messages = serializers.SerializerMethodField()
-    receipt = serializers.SerializerMethodField()
-    unread_messages = serializers.SerializerMethodField()
+    messages = MessageSerializer(many=True)
 
     class Meta:
         model = Chat
@@ -56,31 +52,6 @@ class ChatSerializer(serializers.ModelSerializer):
             context=self.context,
             many=True
         ).data
-
-    def get_receipt(self, instance):
-        if self.context and "user" in self.context:
-            user = self.context.get("user")
-            receipt = instance.receipts.filter(user=user).first()
-            if receipt:
-                return ReceiptSerializer(instance=receipt).data
-            else:
-                return None
-        else:
-            return None
-
-    def get_unread_messages(self, instance):
-        if self.context and "user" in self.context:
-            user = self.context.get("user")
-            receipt = instance.receipts.filter(user=user).first()
-            other_messages = instance.messages.exclude(user=user)
-            if receipt:
-                datetime_updated = receipt.datetime_updated
-                unread_messages = other_messages.filter(
-                    datetime_created__gt=datetime_updated).count()
-                return unread_messages
-            else:
-                return other_messages.count()
-        return None
 
 
 class ConversationSerializer(serializers.ModelSerializer):
