@@ -12,4 +12,6 @@ urlpatterns = [
         PartyJoinView.as_view()),
     url(r'^api/parties/leave/(?P<pk>[0-9]+)$', PartyLeaveView.as_view()),
     url(r'^api/parties/kick/(?P<pk>[0-9]+)$', PartyKickView.as_view()),
+    url(r'^api/parties/(?P<access_code>[a-zA-Z0-9_]+)/poll/$',
+        PartyPollView.as_view()),
 ]

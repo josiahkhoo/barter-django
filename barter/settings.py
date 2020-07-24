@@ -70,7 +70,6 @@ ROOT_URLCONF = 'urls'
 
 AUTHENTICATION_BACKENDS = [
     'users.backends.JWTAuthentication',
-    'django.contrib.auth.backends.ModelBackend',
 ]
 
 REST_FRAMEWORK = {
@@ -110,6 +109,18 @@ DATABASES = dict()
 
 DATABASES['default'] = dj_database_url.parse(
     DJANGO_DATABASE_URL, conn_max_age=0)
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': os.environ.get("REDIS_URL"),
+        'OPTIONS': {
+            'DB': 0,
+            'PASSWORD': os.environ.get("REDIS_PASSWORD"),
+        },
+        'TIMEOUT': 300  # 5 minutes
+    }
+}
 
 
 # Password validation

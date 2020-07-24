@@ -1,8 +1,11 @@
+from os import access
 from django.db import models, IntegrityError
 from chats.models import *
 from parties.utils import *
+from monsters.models import *
 from services.firestore.firestore import db as firestore_db
-
+from django.core.cache import cache
+import datetime
 import uuid
 
 # Create your models here.
@@ -10,10 +13,8 @@ import uuid
 
 class Party(models.Model):
 
-    leader = models.ForeignKey(User,
-                               blank=True, null=True,
-                               related_name="parties_in_charge",
-                               on_delete=models.CASCADE)
+    monster = models.ForeignKey(
+        Monster, related_name='parties', on_delete=models.CASCADE)
     users = models.ManyToManyField(User, blank=True, related_name='parties')
     datetime_created = models.DateTimeField(default=timezone.now)
     datetime_updated = models.DateTimeField(auto_now=True)
@@ -23,6 +24,9 @@ class Party(models.Model):
     access_code = models.CharField(
         max_length=6, unique=True, blank=True)
     is_active = models.BooleanField(default=True)
+    state = models.IntegerField(
+        choices=PartyState.choices(), default=0
+    )
 
     def save(self, *args, **kwargs):
         if not self.access_code:
@@ -61,16 +65,6 @@ class Party(models.Model):
             party=self
         )
 
-    def kick_user(self, user):
-        self.users.remove(user)
-        Message.create_message_system(
-            content="{} has been kicked.".format(user.username),
-            chat=self.chat
-        )
-        PartyEvent.create_ui_party_update(
-            party=self
-        )
-
     def remove_user(self, user):
         """
         Occurs when user leaves chat on his own
@@ -83,6 +77,40 @@ class Party(models.Model):
         PartyEvent.create_ui_party_update(
             party=self
         )
+
+    def poll(self, user, status):
+        access_code = self.access_code
+
+        # cache this
+        key = "{}_{}".format(str(access_code), str(user.id))
+        cache.set(
+            key, {
+                "status": int(status),
+                "user": user
+            }, timeout=10
+        )
+
+        # check for everyone
+        pattern = "{}_*".format(access_code)
+        all_keys = cache.keys(pattern)
+        print(all_keys)
+
+        ready_users = []
+        all_users = []
+        for keys in all_keys:
+            items = cache.get(key)
+            user = items["user"]
+            if items["status"] == 1:
+                ready_users += [user]
+            all_users += [user]
+
+        # if all ready
+        # all_ready = True
+        return {
+            'ready_users': ready_users,
+            'all_users': all_users,
+            'all_ready': False,
+        }
 
 
 class PartyEvent(models.Model):

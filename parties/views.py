@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from rest_framework.status import HTTP_200_OK
 from rest_framework.views import APIView
 from rest_framework import status, authentication, permissions
 
@@ -52,7 +53,6 @@ class PartyView(APIView):
             party = form.save()
             party.users.add(user)
             # sets current user as the leader
-            party.leader = user
             party.save()
             data = serializer_to_body(
                 PartySerializer, party, "party", context={"user": user}
@@ -93,7 +93,6 @@ class PartyJoinView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
         print(access_code)
         party = get_object_or_404(Party, access_code=access_code)
-        deal = party.deal
         if party.users.count() > deal.orders_required:
             return Response("Party is full",
                             status=status.HTTP_400_BAD_REQUEST)
@@ -163,3 +162,33 @@ class PartyKickView(APIView):
         data = serializer_to_body(
             PartySerializer, party, "party", context={"user": user})
         return Response(data, status.HTTP_200_OK)
+
+
+class PartyPollView(APIView):
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, access_code):
+        """
+        Takes in a e.g.
+        status:
+        [0] - not ready
+        [1] - ready
+        """
+        user = request.user
+        party = get_object_or_404(Party, access_code=access_code)
+        data = post_request_parser(request)
+        state = data.get("state", None)
+        if not state:
+            return Response("No status", status=status.HTTP_400_BAD_REQUEST)
+        result = party.poll(user, state)
+        ready_users = result["ready_users"]
+        all_users = result["all_users"]
+        all_ready = result["all_ready"]
+        return Response({
+            "data": {
+                "ready_users": UserSerializer(ready_users, many=True).data,
+                "all_users": UserSerializer(all_users, many=True).data,
+                "all_ready": all_ready
+            }
+        }, status=status.HTTP_200_OK)
