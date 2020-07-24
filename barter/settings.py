@@ -71,6 +71,7 @@ ROOT_URLCONF = 'urls'
 
 AUTHENTICATION_BACKENDS = [
     'users.backends.JWTAuthentication',
+    'django.contrib.auth.backends.ModelBackend'
 ]
 
 REST_FRAMEWORK = {
