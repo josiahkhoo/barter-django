@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'chats',
     'parties',
     'battles',
+    'equipments',
 ]
 
 MIDDLEWARE = [

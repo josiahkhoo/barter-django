@@ -78,6 +78,9 @@ class Party(models.Model):
             party=self
         )
 
+    def get_size_required(self):
+        return self.monster.party_size
+
     def poll(self, user, status):
         access_code = self.access_code
 
@@ -104,12 +107,15 @@ class Party(models.Model):
                 ready_users += [user]
             all_users += [user]
 
-        # if all ready
-        # all_ready = True
+        if len(ready_users) >= self.get_size_required():
+            all_ready = True
+        else:
+            all_ready = False
+
         return {
             'ready_users': ready_users,
             'all_users': all_users,
-            'all_ready': False,
+            'all_ready': all_ready,
         }
 
 

@@ -13,3 +13,4 @@ class Monster(models.Model):
     appearance_config = JSONField()
     datetime_added = models.DateTimeField(default=timezone.now)
     is_active = models.BooleanField(default=True)
+    party_size = models.IntegerField(default=1)
