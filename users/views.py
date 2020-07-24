@@ -28,7 +28,6 @@ class UserLoginView(APIView):
 
     def post(self, request):
         data = post_request_parser(request)
-        print(data)
         username = data['username']
         password = data['password']
         user = authenticate(request, username=username, password=password)
