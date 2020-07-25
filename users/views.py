@@ -179,3 +179,19 @@ class UserFriendsView(APIView):
         users = user.get_friends()
         body = serializer_to_many_body(UserSerializer, users, "users")
         return Response(body, status=status.HTTP_200_OK)
+
+
+class UserFriendsDeclineView(APIView):
+
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        data = post_request_parser(request)
+        user_id = data.get("user")
+        other_user = get_object_or_404(User, pk=user_id)
+        user.decline_friend(other_user)
+        users = user.get_friends()
+        body = serializer_to_many_body(UserSerializer, users, "users")
+        return Response(body, status=status.HTTP_200_OK)

@@ -96,3 +96,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.outgoing_friends.add(other_user)
         self.save()
         return self
+
+    def decline_friend(self, other_user):
+        other_user.outgoing_friends.remove(self)
+        return True

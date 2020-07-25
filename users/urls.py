@@ -19,4 +19,6 @@ urlpatterns = [
         views.UserFriendsView.as_view()),
     url(r'^api/users/friends/requests/$',
         views.UserFriendsRequestView.as_view()),
+    url(r'^api/users/friends/decline/$',
+        views.UserFriendsDeclineView.as_view()),
 ]
