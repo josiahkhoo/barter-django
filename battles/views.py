@@ -9,35 +9,49 @@ from rest_framework import status, authentication, permissions
 from .serializers import *
 from .forms import *
 from barter.utils import *
-
 # Create your views here.
 
 
 class BattleView(APIView):
+    """
+    Pass Character ID
+    """
 
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request, pk=None):
+        """
+        api/battles?character_id=x
+        """
         user = request.user
         if pk:
             battle = get_object_or_404(Battle, pk=pk)
-            if battle.user == user:
+            if battle.character.user == user:
                 body = serializer_to_body(
                     BattleSerializer, battle, "battle", context={"user": user}
                 )
             else:
                 return Response(status=status.HTTP_403_FORBIDDEN)
         else:
-            battles = user.battles.all()
-            body = serializer_to_many_body(
-                BattleSerializer, battles, "battles", context={"user": user}
-            )
-        return Response(body, status=status.HTTP_200_OK)
+            query_params = request.GET.dict()
+            if query_params:
+                character_id = query_params.get("character_id")
+                battles = user.characters.get(pk=character_id).battles
+                body = serializer_to_many_body(
+                    BattleSerializer, battles, "battles",
+                    context={"user": user}
+                )
+                return Response(body, status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_403_FORBIDDEN)
 
     def post(self, request):
+        """
+        form data
+        character = x
+        """
         user = request.user
         data = post_request_parser(request)
-        data["user"] = user
+        data["character"] = user.characters.get(pk=data["character"])
         form = BattleForm(data)
         if form.is_valid():
             battle = form.save()
@@ -56,7 +70,7 @@ class BattleCompleteView(APIView):
     def post(self, request, pk):
         user = request.user
         battle = get_object_or_404(Battle, pk=pk)
-        if battle.user != user:
+        if battle.character.user != user:
             return Response(status=status.HTTP_403_FORBIDDEN)
         battle.set_state_complete()
         data = serializer_to_body(
@@ -72,7 +86,7 @@ class BattleForfeitView(APIView):
     def post(self, request, pk):
         user = request.user
         battle = get_object_or_404(Battle, pk=pk)
-        if battle.user != user:
+        if battle.character.user != user:
             return Response(status=status.HTTP_403_FORBIDDEN)
         battle.set_state_forfeited()
         data = serializer_to_body(

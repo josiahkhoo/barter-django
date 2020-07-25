@@ -10,6 +10,7 @@ from .forms import *
 
 from users.models import *
 from barter.utils import *
+from characters.models import *
 from parties.utils import *
 # Create your views here.
 
@@ -179,16 +180,20 @@ class PartyPollView(APIView):
         party = get_object_or_404(Party, access_code=access_code)
         data = post_request_parser(request)
         state = data.get("state", None)
+        character_id = data.get("character", None)
+        character = Character.objects.get(pk=character_id)
         if not state:
             return Response("No status", status=status.HTTP_400_BAD_REQUEST)
-        result = party.poll(user, state)
-        ready_users = result["ready_users"]
-        all_users = result["all_users"]
+        result = party.poll(user, character, state)
+        ready_characters = result["ready_characters"]
+        all_characters = result["all_characters"]
         all_ready = result["all_ready"]
         return Response({
             "data": {
-                "ready_users": UserSerializer(ready_users, many=True).data,
-                "all_users": UserSerializer(all_users, many=True).data,
+                "ready_characters": CharacterSerializer(ready_characters,
+                                                        many=True).data,
+                "all_characters": CharacterSerializer(all_characters,
+                                                      many=True).data,
                 "all_ready": all_ready
             }
         }, status=status.HTTP_200_OK)

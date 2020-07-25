@@ -8,4 +8,5 @@ app_name = 'monsters'
 urlpatterns = [
     url(r'^api/monsters/(?P<pk>[0-9]+)$', MonsterView.as_view()),
     url(r'^api/monsters/$', MonsterView.as_view()),
+    url(r'^api/monsters/multiplayer/$', MonsterMultiplayerView.as_view()),
 ]

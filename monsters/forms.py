@@ -10,5 +10,7 @@ class MonsterForm(forms.ModelForm):
             'name',
             'level',
             'duration',
-            'appearance_config'
+            'appearance_config',
+            'party_size',
+            'drop_set'
         )

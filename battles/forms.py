@@ -7,6 +7,6 @@ class BattleForm(forms.ModelForm):
     class Meta:
         model = Battle
         fields = [
-            'user',
+            'character',
             'monster'
         ]

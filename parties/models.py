@@ -81,7 +81,7 @@ class Party(models.Model):
     def get_size_required(self):
         return self.monster.party_size
 
-    def poll(self, user, status):
+    def poll(self, user, character, status):
         access_code = self.access_code
 
         # cache this
@@ -89,7 +89,7 @@ class Party(models.Model):
         cache.set(
             key, {
                 "status": int(status),
-                "user": user
+                "character": character
             }, timeout=10
         )
 
@@ -98,23 +98,23 @@ class Party(models.Model):
         all_keys = cache.keys(pattern)
         print(all_keys)
 
-        ready_users = []
-        all_users = []
+        ready_characters = []
+        all_characters = []
         for keys in all_keys:
             items = cache.get(key)
-            user = items["user"]
+            character = items["character"]
             if items["status"] == 1:
-                ready_users += [user]
-            all_users += [user]
+                ready_characters += [character]
+            all_characters += [character]
 
-        if len(ready_users) >= self.get_size_required():
+        if len(ready_characters) >= self.get_size_required():
             all_ready = True
         else:
             all_ready = False
 
         return {
-            'ready_users': ready_users,
-            'all_users': all_users,
+            'ready_characters': ready_characters,
+            'all_characters': all_characters,
             'all_ready': all_ready,
         }
 

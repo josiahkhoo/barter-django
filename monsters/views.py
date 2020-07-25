@@ -13,6 +13,9 @@ from .forms import MonsterForm
 class MonsterView(APIView):
 
     def get(self, request, pk=None):
+        """
+        Retrieves single party bosses
+        """
         if pk:
             try:
                 monster = Monster.objects.get(pk=pk)
@@ -24,7 +27,7 @@ class MonsterView(APIView):
                 return Response("Monster does not exist",
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            monsters = Monster.objects.all()
+            monsters = Monster.objects.filter(party_size=1).all()
             body = {"data": MonsterSerializer(monsters, many=True).data}
             return Response(body, status=status.HTTP_200_OK)
 
@@ -58,3 +61,25 @@ class MonsterView(APIView):
         except Monster.DoesNotExist:
             return Response("Monster does not exist",
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+class MonsterMultiplayerView(APIView):
+
+    def get(self, request, pk=None):
+        """
+        Retrieves multiplayer bosses
+        """
+        if pk:
+            try:
+                monster = Monster.objects.get(pk=pk)
+                body = serializer_to_body(
+                    MonsterSerializer, monster, "monster"
+                )
+                return Response(body, status=status.HTTP_200_OK)
+            except Monster.DoesNotExist:
+                return Response("Monster does not exist",
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            monsters = Monster.objects.filter(party_size__gte=2).all()
+            body = {"data": MonsterSerializer(monsters, many=True).data}
+            return Response(body, status=status.HTTP_200_OK)

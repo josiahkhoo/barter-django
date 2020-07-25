@@ -4,12 +4,14 @@ from .models import *
 from chats.serializers import *
 from users.serializers import *
 from monsters.serializers import *
+from equipments.serializers import *
 
 
 class BattleSerializer(serializers.ModelSerializer):
 
-    user = UserSerializer()
+    character = CharacterSerializer()
     monster = MonsterSerializer()
+    equipment = EquipmentSerializer()
 
     class Meta:
         model = Battle
