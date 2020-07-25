@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.views import APIView
 from rest_framework import status, authentication, permissions
+from django.db.models import Q
 
 from .models import *
 from .serializers import *
@@ -131,7 +132,7 @@ class UserConversationView(APIView):
         recipient_user = get_object_or_404(User, pk=pk)
         user = request.user
         conversation = Conversation.objects.filter(
-            users__in=[user, recipient_user]).first()
+            users=user).filter(users=recipient_user).first()
         if not conversation:
             conversation = Conversation()
             conversation.save()
