@@ -1,9 +1,12 @@
 from rest_framework import serializers
+from rest_framework.fields import SerializerMethodField
 from .models import *
 from users.serializers import *
 
 
 class MessageSerializer(serializers.ModelSerializer):
+
+    username = SerializerMethodField()
 
     class Meta:
         model = Message
@@ -15,6 +18,9 @@ class MessageSerializer(serializers.ModelSerializer):
             if instance.user == user:
                 return True
         return False
+
+    def get_username(self, instance):
+        return instance.user.username
 
 
 class ReceiptSerializer(serializers.ModelSerializer):
