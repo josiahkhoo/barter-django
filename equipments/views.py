@@ -19,7 +19,7 @@ class EquipmentView(APIView):
             character_id = filters_dict.get('character_id')
             character = user.characters.get(pk=character_id)
             battles = character.battles.all()
-            equipments = list(
+            equipments = set(
                 filter(lambda x: x, map(lambda x: x.equipment, battles)))
             equipment_type = filters_dict.get('equipment_type')
             if equipment_type:
