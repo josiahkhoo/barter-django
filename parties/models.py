@@ -100,12 +100,13 @@ class Party(models.Model):
 
         ready_characters = []
         all_characters = []
-        for keys in all_keys:
+        for key in all_keys:
             items = cache.get(key)
-            character = items["character"]
+            print(items)
+            other_character = items["character"]
             if items["status"] == 1:
-                ready_characters += [character]
-            all_characters += [character]
+                ready_characters += [other_character]
+            all_characters += [other_character]
 
         if len(ready_characters) >= self.get_size_required():
             all_ready = True
