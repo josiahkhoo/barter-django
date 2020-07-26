@@ -63,7 +63,7 @@ class CharacterAchievementView(APIView):
                 },
                 {
                     "name": "Total Success Time",
-                    "value": "{} minutes".format(total_success_time / 60)
+                    "value": "{} minutes".format(int(total_success_time / 60))
                 }
             ]
             return Response(body, status=status.HTTP_200_OK)
