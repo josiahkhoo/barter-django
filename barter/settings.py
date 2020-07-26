@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django_countries',
     'django_redis',
     'django_extensions',
+    'corsheaders',
     'rest_framework',
     'users',
     'characters',
@@ -101,7 +102,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'barter.wsgi.application'
 
-
+CORS_ORIGIN_ALLOW_ALL = True
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 DJANGO_DATABASE_URL = os.environ.get("POSTGRESQL_DATABASE_URL")
