@@ -20,6 +20,8 @@ class MessageSerializer(serializers.ModelSerializer):
         return False
 
     def get_username(self, instance):
+        if not instance.user:
+            return None
         return instance.user.username
 
 
@@ -32,7 +34,7 @@ class ReceiptSerializer(serializers.ModelSerializer):
 
 class ChatSerializer(serializers.ModelSerializer):
 
-    # messages = serializers.SerializerMethodField()
+    messages = serializers.SerializerMethodField()
 
     class Meta:
         model = Chat
