@@ -33,7 +33,6 @@ class ReceiptSerializer(serializers.ModelSerializer):
 class ChatSerializer(serializers.ModelSerializer):
 
     # messages = serializers.SerializerMethodField()
-    messages = MessageSerializer(many=True)
 
     class Meta:
         model = Chat

@@ -94,16 +94,12 @@ class PartyJoinView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
         print(access_code)
         party = get_object_or_404(Party, access_code=access_code)
-        if party.users.count() > deal.orders_required:
-            return Response("Party is full",
-                            status=status.HTTP_400_BAD_REQUEST)
+        if party.state == int(PartyState.COMPLETED):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
         user = request.user
-        if user in party.users.all():
-            return Response("User is already part of the party",
-                            status=status.HTTP_400_BAD_REQUEST)
         party.add_user(user)
         data = serializer_to_body(
-            PartySerializer, party, "party", context={"user": user}
+            PartySerializer, party, "party",
         )
         return Response(data, status.HTTP_200_OK)
 
