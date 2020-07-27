@@ -27,7 +27,8 @@ class MonsterView(APIView):
                 return Response("Monster does not exist",
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            monsters = Monster.objects.filter(party_size=1).all()
+            monsters = Monster.objects.filter(
+                party_size=1).order_by('pk').all()
             body = {"data": MonsterSerializer(monsters, many=True).data}
             return Response(body, status=status.HTTP_200_OK)
 
@@ -80,6 +81,7 @@ class MonsterMultiplayerView(APIView):
                 return Response("Monster does not exist",
                                 status=status.HTTP_400_BAD_REQUEST)
         else:
-            monsters = Monster.objects.filter(party_size__gte=2).all()
+            monsters = Monster.objects.filter(
+                party_size__gte=2).order_by('pk').all()
             body = {"data": MonsterSerializer(monsters, many=True).data}
             return Response(body, status=status.HTTP_200_OK)

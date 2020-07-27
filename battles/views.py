@@ -36,7 +36,8 @@ class BattleView(APIView):
             query_params = request.GET.dict()
             if query_params:
                 character_id = query_params.get("character_id")
-                battles = user.characters.get(pk=character_id).battles
+                battles = user.characters.get(
+                    pk=character_id).battles.order_by('-datetime_created')
                 body = serializer_to_many_body(
                     BattleSerializer, battles, "battles",
                     context={"user": user}
